@@ -6,4 +6,7 @@ data class TaskUiState(
     val tasks: List<Task> = emptyList(),
     val error: String = "",
     val status: String = "",
+    val editTaskMsg: String = "",
+    val isTaskImportant: Boolean = false,
+    val isSheetOpen: Boolean = false
 )

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Badge
@@ -18,6 +19,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,14 +82,28 @@ fun TaskItem(task: Task, onEvent: (TaskEvent) -> Unit) {
                 }
             }
             Checkbox(checked = task.isCompleted, onCheckedChange = {
-                onEvent(TaskEvent.UpdateTask(!task.isCompleted))
+                onEvent(
+                    TaskEvent.UpdateTask(
+                        name = task.name,
+                        isComplete = !task.isCompleted
+                    )
+                )
             })
         }
-
-
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddTaskDialog(
+    uiState: TaskUiState,
+    onEvent: (TaskEvent) -> Unit,
+) {
+    ModalBottomSheet(onDismissRequest = {}) {
+        BasicTextField(value = uiState.editTaskMsg, onValueChange = {})
+        Checkbox(checked = uiState.isTaskImportant, onCheckedChange = {})
+    }
+}
 
 @Composable
 fun TaskBottomBar(onEvent: (TaskEvent) -> Unit) {
@@ -97,7 +113,8 @@ fun TaskBottomBar(onEvent: (TaskEvent) -> Unit) {
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        FloatingActionButton(onClick = { onEvent(TaskEvent.AddTask) }) {
+        // handle sheet visibility
+        FloatingActionButton(onClick = { onEvent(TaskEvent.ToggleSheet) }) {
             Icon(imageVector = Icons.Default.Add, contentDescription = "add task")
         }
     }
