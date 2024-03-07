@@ -9,17 +9,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -38,12 +39,14 @@ fun TaskScreen(
     Scaffold(bottomBar = {
         TaskBottomBar(onEvent = onEvent)
     }) {
+        AddTaskDialog(uiState = uiState, onEvent = onEvent)
         Column(modifier = Modifier.padding(it)) {
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+                item { Text(text = "${uiState.isSheetOpen}") }
                 items(uiState.tasks) { task ->
                     TaskItem(task = task, onEvent = onEvent)
                 }
@@ -99,9 +102,47 @@ fun AddTaskDialog(
     uiState: TaskUiState,
     onEvent: (TaskEvent) -> Unit,
 ) {
-    ModalBottomSheet(onDismissRequest = {}) {
-        BasicTextField(value = uiState.editTaskMsg, onValueChange = {})
-        Checkbox(checked = uiState.isTaskImportant, onCheckedChange = {})
+    if (uiState.isSheetOpen) {
+        AlertDialog(onDismissRequest = {
+            onEvent(TaskEvent.ToggleSheet)
+        }) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = {},
+            ) {
+                Column {
+                    OutlinedTextField(
+                        value = uiState.editTaskMsg,
+                        onValueChange = {
+                            onEvent(TaskEvent.EditTaskName(it))
+                        },
+                        label = { Text("Task Name") },
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .fillMaxWidth()
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = uiState.isTaskImportant,
+                                onCheckedChange = {
+                                    onEvent(TaskEvent.EditTaskImportance(isImportant = it))
+                                }
+                            )
+                            Text("Important")
+                        }
+                        Button(onClick = {
+                            onEvent(TaskEvent.AddTask)
+                            onEvent(TaskEvent.ToggleSheet)
+                        }) {
+                            Text("Add Task")
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
